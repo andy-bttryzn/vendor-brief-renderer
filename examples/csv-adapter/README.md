@@ -2,14 +2,14 @@
 
 Shows the boundary between your data source and the renderer.
 
-The point of this example isn't CSV — it's the *shape* of an adapter. Your real adapter will pull from monday, Salesforce, Airtable, your own database, or wherever your vendor data lives. The output is always the `vendor.json` shape the renderer expects.
+The point of this example isn't CSV; it's the *shape* of an adapter. Your real adapter will pull from monday, Salesforce, Airtable, your own database, or wherever your vendor data lives. The output is always the `vendor.json` shape the renderer expects.
 
 ## Files
 
-- `adapter.js` — reads 3 CSVs (vendor / tasks / contacts), produces `vendor.json` on stdout
-- `sample-vendor.csv` — one row of vendor data
-- `sample-tasks.csv` — rows of tasks, joined to vendor by `vendor_id`
-- `sample-contacts.csv` — rows of contacts, joined to vendor by `vendor_id`
+- `adapter.js`: reads 3 CSVs (vendor / tasks / contacts), produces `vendor.json` on stdout
+- `sample-vendor.csv`: one row of vendor data
+- `sample-tasks.csv`: rows of tasks, joined to vendor by `vendor_id`
+- `sample-contacts.csv`: rows of contacts, joined to vendor by `vendor_id`
 
 ## End-to-end run
 

@@ -8,7 +8,7 @@ This is the rendering layer of a vendor-ops workflow. Data gathering (CRM, ticke
 
 ## Why a renderer-only project
 
-Every vendor-ops shop has its own data sources, label schemes, board IDs, and column conventions. A renderer that *also* tries to be a fetcher ends up either (a) coupled to one shop's stack, or (b) drowning in adapter abstractions. The renderer alone is the portable artifact — give it a JSON file matching the contract, get a clean brief out.
+Every vendor-ops shop has its own data sources, label schemes, board IDs, and column conventions. A renderer that *also* tries to be a fetcher ends up either (a) coupled to one shop's stack, or (b) drowning in adapter abstractions. The renderer alone is the portable artifact: give it a JSON file matching the contract, get a clean brief out.
 
 Wire your CRM / ticket / inbox fetchers however your stack demands. The brief shape is the contract.
 
@@ -121,7 +121,7 @@ npm test
 node --test tests/
 ```
 
-19 smoke + edge tests. Zero dependencies — uses Node 18's built-in `node:test` runner.
+19 smoke + edge tests. Zero dependencies; uses Node 18's built-in `node:test` runner.
 
 ## Programmatic use
 
@@ -134,7 +134,7 @@ fs.writeFileSync('acme.md', markdown);
 
 ## Design notes
 
-- **Sources line on items 9 + 10.** Every Open Item and Recommended Action carries a `sources` array. Render-time becomes `_Sources: [thread abc](url); [task 501](url)_` — clickable provenance for each conclusion. Bias toward "show your work" so the analyst's call is auditable later.
+- **Sources line on items 9 + 10.** Every Open Item and Recommended Action carries a `sources` array. Render-time becomes `_Sources: [thread abc](url); [task 501](url)_`: clickable provenance for each conclusion. Bias toward "show your work" so the analyst's call is auditable later.
 - **Inactive contacts kept, not hidden.** Useful when re-engaging dormant relationships or attributing past comms. Filtering is a downstream concern.
 - **No "blocked" Recommended Action language.** Actions are written as imperatives; if something can't be done, it belongs in Open Items with a `waitingOn`.
 
