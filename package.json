@@ -1,0 +1,17 @@
+{
+  "name": "vendor-brief-renderer",
+  "version": "1.0.0",
+  "description": "Render a structured vendor.json into a 10-section Markdown brief.",
+  "main": "index.js",
+  "bin": {
+    "vendor-brief": "index.js"
+  },
+  "scripts": {
+    "start": "node index.js examples/example-vendor.json",
+    "example": "node index.js examples/example-vendor.json"
+  },
+  "license": "MIT",
+  "engines": {
+    "node": ">=18"
+  }
+}

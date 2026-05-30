@@ -1,0 +1,164 @@
+{
+  "vendor": {
+    "id": "9876543210",
+    "name": "Acme Roofing Network",
+    "side": "Buyer",
+    "status": "Live",
+    "rating": 4,
+    "url": "https://acme-roofing.example.com",
+    "notes": "Standard ping-post integration. Pays Net-15. Slow to QA returns; chase on the 1st.",
+    "sourcing": "Direct (referred by Northwind in Q4 2025)",
+    "verticals": {
+      "live": ["Roofing"],
+      "other": ["Solar"]
+    },
+    "modalities": {
+      "live": ["Web Leads", "Inbound Calls"],
+      "other": []
+    }
+  },
+  "contacts": {
+    "active": [
+      {
+        "name": "Jane Diaz",
+        "role": "Director of Operations",
+        "email": "jane@acme-roofing.example.com",
+        "phone": "+1 555-0101"
+      },
+      {
+        "name": "Tom Reilly",
+        "role": "Accounts Payable",
+        "email": "ap@acme-roofing.example.com",
+        "phone": ""
+      }
+    ],
+    "inactive": [
+      {
+        "name": "Sarah Park",
+        "role": "Former GM (left Aug 2025)",
+        "email": "spark@acme-roofing.example.com",
+        "phone": ""
+      }
+    ]
+  },
+  "tasks": {
+    "blockers": [
+      {
+        "id": "TASK-501",
+        "name": "Confirm Q2 cap raise vs current 150/day",
+        "status": "Waiting on Client",
+        "notes": "Asked Jane on 5/22. No reply yet.",
+        "updatedAt": "2026-05-22T10:00:00Z",
+        "url": "https://example.com/tasks/501"
+      }
+    ],
+    "ongoing": [
+      {
+        "id": "TASK-498",
+        "name": "Build state-level reporting view",
+        "status": "Waiting on us",
+        "notes": "Need to wire up the per-state breakdown by next Friday.",
+        "updatedAt": "2026-05-25T14:00:00Z",
+        "url": "https://example.com/tasks/498"
+      }
+    ],
+    "upcoming": [
+      {
+        "id": "TASK-510",
+        "name": "Q3 contract amendment - revised pricing",
+        "status": "Upcoming",
+        "notes": "Targeting July 1 for signature.",
+        "updatedAt": "2026-05-15T09:00:00Z",
+        "url": "https://example.com/tasks/510"
+      }
+    ],
+    "completed": []
+  },
+  "links": [
+    {
+      "url": "https://example.com/contracts/acme-msa-2025.pdf",
+      "notes": "Signed MSA (Oct 2025)"
+    },
+    {
+      "url": "https://example.com/tracking/acme",
+      "notes": "Acme's lead tracking dashboard"
+    }
+  ],
+  "inboxMatrix": [
+    {
+      "threadUrl": "https://mail.example.com/thread/abc123",
+      "subject": "Re: Q2 cap raise",
+      "lastDate": "2026-05-22T10:00:00Z",
+      "owner": "Jane",
+      "labels": ["00.received", "01.priority", "02.waiting/customer"],
+      "summary": "Asked Jane to confirm new daily cap; no reply 8d."
+    },
+    {
+      "threadUrl": "https://mail.example.com/thread/def456",
+      "subject": "April invoice IWL-9911",
+      "lastDate": "2026-05-18T11:30:00Z",
+      "owner": "AP",
+      "labels": ["00.received", "02.waiting/customer"],
+      "summary": "Sent invoice 5/3; partial payment $4,200 of $7,800 received 5/12. Balance outstanding."
+    }
+  ],
+  "reference": {
+    "Vendor ID (internal)": "9876543210",
+    "Vendor external ID": "ext_4422",
+    "Return type": "Per-lead via portal",
+    "Payment terms": "Net-15",
+    "Minimum payment threshold": "$0 (no batching)"
+  },
+  "synthesis": "Acme is performing reliably on roofing volume but the Q2 cap raise ask is stalled and the April invoice is half-paid 18 days after issue. Both items go through Jane; neither has had a follow-up nudge in the last week. Recommend a single consolidated email today asking for cap decision + balance ETA, then snooze 5d.",
+  "openItems": [
+    {
+      "text": "Q2 cap raise decision (asked 5/22, no reply)",
+      "waitingOn": "Jane @ Acme",
+      "sources": [
+        { "label": "thread abc123", "url": "https://mail.example.com/thread/abc123" }
+      ]
+    },
+    {
+      "text": "April invoice IWL-9911 balance $3,600 outstanding 18d",
+      "waitingOn": "Acme AP",
+      "sources": [
+        { "label": "thread def456", "url": "https://mail.example.com/thread/def456" }
+      ]
+    },
+    {
+      "text": "State-level reporting view promised by 5/29",
+      "waitingOn": "us",
+      "sources": [
+        { "label": "task 498", "url": "https://example.com/tasks/498" }
+      ]
+    }
+  ],
+  "recommendedActions": [
+    {
+      "text": "Send Jane consolidated nudge covering cap decision + invoice balance.",
+      "assignee": "me",
+      "sources": [
+        { "label": "thread abc123", "url": "https://mail.example.com/thread/abc123" },
+        { "label": "thread def456", "url": "https://mail.example.com/thread/def456" }
+      ]
+    },
+    {
+      "text": "Finish state-level reporting view today.",
+      "assignee": "me",
+      "sources": [
+        { "label": "task 498", "url": "https://example.com/tasks/498" }
+      ]
+    },
+    {
+      "text": "Draft Q3 amendment redline by 6/15.",
+      "assignee": "legal",
+      "sources": [
+        { "label": "task 510", "url": "https://example.com/tasks/510" }
+      ]
+    }
+  ],
+  "headerMeta": {
+    "generatedAt": "2026-05-30T08:45:00Z",
+    "scope": "full"
+  }
+}
