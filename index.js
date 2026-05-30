@@ -22,8 +22,11 @@ const fs = require('fs');
 const path = require('path');
 
 function loadVendor(filePath) {
-  if (!filePath) throw new Error('usage: node index.js <vendor.json> [--section N] [--no-empty]');
-  const raw = fs.readFileSync(filePath, 'utf8');
+  if (!filePath) throw new Error('usage: node index.js <vendor.json|-> [--section N] [--no-empty]');
+  // "-" means read JSON from stdin (lets you pipe an adapter's output in)
+  const raw = filePath === '-'
+    ? fs.readFileSync(0, 'utf8')
+    : fs.readFileSync(filePath, 'utf8');
   return JSON.parse(raw);
 }
 

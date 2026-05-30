@@ -1,0 +1,4 @@
+id,vendor_id,name,status,group,notes,updated_at,url
+t_101,v_001,Approve TX cap raise to 300/day,Waiting on us,blockers,Beacon asked 5/26. Tier 1 buyer; recommend approving today.,2026-05-26T14:00:00Z,https://example.com/tasks/101
+t_102,v_001,Schedule Q3 quarterly review,Waiting on us,ongoing,Aim for second week of July.,2026-05-20T09:00:00Z,https://example.com/tasks/102
+t_103,v_001,Q1 contract renewal countersigned,Done,completed,Renewal closed 3/15.,2026-03-15T16:00:00Z,https://example.com/tasks/103

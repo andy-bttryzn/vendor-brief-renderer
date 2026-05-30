@@ -1,0 +1,4 @@
+vendor_id,name,role,email,phone,status
+v_001,Maria Chen,Head of Demand,maria@beaconsolar.example.com,+1 555-0140,active
+v_001,Devon Park,Accounts Payable,ap@beaconsolar.example.com,,active
+v_001,Lou Rivers,Former Director (left Dec 2025),lrivers@beaconsolar.example.com,,inactive

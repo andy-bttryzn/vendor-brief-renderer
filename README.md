@@ -109,6 +109,8 @@ type Task = {
 
 See `examples/example-vendor.json` and `examples/example-output.md` for a full worked example.
 
+See `examples/csv-adapter/` for an end-to-end pipeline showing how to turn data from a real source (CSVs in the example, but it could be monday / Salesforce / Airtable / your DB) into `vendor.json` and feed it to the renderer.
+
 ## Tests
 
 ```bash
