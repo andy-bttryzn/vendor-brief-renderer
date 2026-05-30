@@ -1,5 +1,7 @@
 # vendor-brief-renderer
 
+![tests](https://github.com/USER/vendor-brief-renderer/actions/workflows/test.yml/badge.svg)
+
 Turn a structured `vendor.json` into a 10-section Markdown brief.
 
 This is the rendering layer of a vendor-ops workflow. Data gathering (CRM, ticketing, email, whatever lives upstream in your shop) is out of scope. Build a fetcher that produces `vendor.json` matching the contract below, pipe it in, get a brief out.

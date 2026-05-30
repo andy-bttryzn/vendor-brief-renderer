@@ -1,0 +1,29 @@
+name: tests
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [18, 20, 22]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Use Node ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+      - name: Run tests
+        run: node --test tests/
+      - name: Verify example renders
+        run: node index.js examples/example-vendor.json > /dev/null
+      - name: Verify CSV adapter pipeline
+        run: |
+          cd examples/csv-adapter
+          node adapter.js sample-vendor.csv sample-tasks.csv sample-contacts.csv \
+            | node ../../index.js - > /dev/null
