@@ -109,6 +109,16 @@ type Task = {
 
 See `examples/example-vendor.json` and `examples/example-output.md` for a full worked example.
 
+## Tests
+
+```bash
+npm test
+# or
+node --test tests/
+```
+
+19 smoke + edge tests. Zero dependencies — uses Node 18's built-in `node:test` runner.
+
 ## Programmatic use
 
 ```js
