@@ -45,6 +45,9 @@ function parseCSV(text) {
 }
 
 function loadCSV(filePath) {
+  if (!fs.existsSync(filePath)) {
+    throw new Error(`CSV file not found: ${filePath}`);
+  }
   return parseCSV(fs.readFileSync(filePath, 'utf8'));
 }
 
@@ -134,9 +137,15 @@ function main() {
     console.error('usage: node adapter.js vendor.csv tasks.csv contacts.csv > vendor.json');
     process.exit(1);
   }
-  const vendors = loadCSV(vendorCsv);
-  const tasks = loadCSV(tasksCsv);
-  const contacts = loadCSV(contactsCsv);
+  let vendors, tasks, contacts;
+  try {
+    vendors = loadCSV(vendorCsv);
+    tasks = loadCSV(tasksCsv);
+    contacts = loadCSV(contactsCsv);
+  } catch (e) {
+    console.error(`ERROR: ${e.message}`);
+    process.exit(1);
+  }
 
   if (vendors.length === 0) {
     console.error('no vendors in CSV');
