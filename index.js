@@ -24,10 +24,23 @@ const path = require('path');
 function loadVendor(filePath) {
   if (!filePath) throw new Error('usage: node index.js <vendor.json|-> [--section N] [--no-empty]');
   // "-" means read JSON from stdin (lets you pipe an adapter's output in)
-  const raw = filePath === '-'
-    ? fs.readFileSync(0, 'utf8')
-    : fs.readFileSync(filePath, 'utf8');
-  return JSON.parse(raw);
+  let raw;
+  if (filePath === '-') {
+    raw = fs.readFileSync(0, 'utf8');
+  } else {
+    if (!fs.existsSync(filePath)) {
+      throw new Error(`file not found: ${filePath}`);
+    }
+    raw = fs.readFileSync(filePath, 'utf8');
+  }
+  const parsed = JSON.parse(raw);
+  if (parsed === null || typeof parsed !== 'object' || Array.isArray(parsed)) {
+    throw new Error(
+      `input must be a JSON object (got ${parsed === null ? 'null' : Array.isArray(parsed) ? 'array' : typeof parsed}). ` +
+      `See README data contract.`
+    );
+  }
+  return parsed;
 }
 
 function parseArgs(argv) {
@@ -284,4 +297,4 @@ if (require.main === module) {
   catch (e) { console.error('ERROR:', e.message); process.exit(1); }
 }
 
-module.exports = { render, SECTIONS };
+module.exports = { render, SECTIONS, loadVendor };

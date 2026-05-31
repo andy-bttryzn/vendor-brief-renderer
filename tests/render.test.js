@@ -7,7 +7,8 @@ const assert = require('node:assert/strict');
 const path = require('node:path');
 const fs = require('node:fs');
 
-const { render, SECTIONS } = require('../index.js');
+const os = require('node:os');
+const { render, SECTIONS, loadVendor } = require('../index.js');
 
 const EXAMPLE_PATH = path.join(__dirname, '..', 'examples', 'example-vendor.json');
 const example = JSON.parse(fs.readFileSync(EXAMPLE_PATH, 'utf8'));
@@ -147,6 +148,51 @@ test('recommended actions are numbered', () => {
   assert.match(out, /1\. First/);
   assert.match(out, /2\. Second/);
   assert.match(out, /3\. Third/);
+});
+
+test('loadVendor: rejects non-object JSON (array)', () => {
+  const tmp = path.join(os.tmpdir(), 'vbr-arr.json');
+  fs.writeFileSync(tmp, '[]');
+  assert.throws(() => loadVendor(tmp), /must be a JSON object \(got array\)/);
+  fs.unlinkSync(tmp);
+});
+
+test('loadVendor: rejects non-object JSON (string)', () => {
+  const tmp = path.join(os.tmpdir(), 'vbr-str.json');
+  fs.writeFileSync(tmp, '"a string"');
+  assert.throws(() => loadVendor(tmp), /must be a JSON object \(got string\)/);
+  fs.unlinkSync(tmp);
+});
+
+test('loadVendor: rejects null', () => {
+  const tmp = path.join(os.tmpdir(), 'vbr-null.json');
+  fs.writeFileSync(tmp, 'null');
+  assert.throws(() => loadVendor(tmp), /must be a JSON object \(got null\)/);
+  fs.unlinkSync(tmp);
+});
+
+test('loadVendor: rejects number', () => {
+  const tmp = path.join(os.tmpdir(), 'vbr-num.json');
+  fs.writeFileSync(tmp, '42');
+  assert.throws(() => loadVendor(tmp), /must be a JSON object \(got number\)/);
+  fs.unlinkSync(tmp);
+});
+
+test('loadVendor: clear error on missing file', () => {
+  assert.throws(() => loadVendor('/nonexistent/path/that/does/not/exist.json'), /file not found/);
+});
+
+test('loadVendor: clear error on malformed JSON', () => {
+  const tmp = path.join(os.tmpdir(), 'vbr-bad.json');
+  fs.writeFileSync(tmp, '{ not json }');
+  assert.throws(() => loadVendor(tmp), SyntaxError);
+  fs.unlinkSync(tmp);
+});
+
+test('loadVendor: accepts valid object', () => {
+  const result = loadVendor(EXAMPLE_PATH);
+  assert.equal(typeof result, 'object');
+  assert.ok(result.vendor);
 });
 
 test('renderer escapes pipe characters in table cells', () => {

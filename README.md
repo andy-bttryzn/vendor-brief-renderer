@@ -121,7 +121,7 @@ npm test
 node --test tests/
 ```
 
-19 smoke + edge tests. Zero dependencies; uses Node 18's built-in `node:test` runner.
+26 smoke + edge tests. Zero dependencies; uses Node 18's built-in `node:test` runner.
 
 ## Programmatic use
 
