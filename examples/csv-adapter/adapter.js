@@ -36,6 +36,9 @@ function parseCSV(text) {
     }
   }
   if (buf.length || cur.length) { cur.push(buf); rows.push(cur); }
+  if (rows.length === 0) {
+    throw new Error('CSV is empty (no header row found)');
+  }
   const headers = rows.shift().map(h => h.trim());
   return rows.filter(r => r.some(v => v.length)).map(r => {
     const obj = {};
