@@ -136,7 +136,7 @@ function section3Contacts(v) {
 function section4InboxMatrix(v) {
   const threads = v.inboxMatrix || [];
   if (!threads.length) return null;
-  const lines = ['## 4. Inbox', ''];
+  const lines = ['## 4. Inbox matrix', ''];
   lines.push('| Subject | Last activity | Owner | Labels | Summary |');
   lines.push('| --- | --- | --- | --- | --- |');
   for (const t of threads) {

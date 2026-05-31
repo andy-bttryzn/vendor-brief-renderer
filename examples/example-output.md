@@ -36,7 +36,7 @@
 | --- | --- | --- | --- |
 | Sarah Park | Former GM (left Aug 2025) | spark@acme-roofing.example.com |  |
 
-## 4. Inbox
+## 4. Inbox matrix
 
 | Subject | Last activity | Owner | Labels | Summary |
 | --- | --- | --- | --- | --- |
