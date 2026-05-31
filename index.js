@@ -13,7 +13,7 @@
 // Schema in TS notation:
 //   See examples/example-vendor.json + README.md for the full contract.
 //
-// Output: Markdown on stdout. The renderer never crashes — missing fields
+// Output: Markdown on stdout. The renderer never crashes; missing fields
 // become "_unknown_" or get the section omitted.
 
 'use strict';
