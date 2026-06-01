@@ -1,0 +1,492 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>vendor-brief-renderer · live demo</title>
+<style>
+  :root {
+    --bg: #fafafa;
+    --fg: #1a1a1a;
+    --muted: #6b7280;
+    --border: #e5e7eb;
+    --accent: #1f6feb;
+    --code-bg: #f3f4f6;
+  }
+  * { box-sizing: border-box; }
+  body { font: 16px/1.55 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; color: var(--fg); background: var(--bg); margin: 0; padding: 24px; }
+  .container { max-width: 1100px; margin: 0 auto; }
+  h1 { font-size: 24px; margin: 0 0 4px; }
+  .lede { color: var(--muted); margin: 0 0 24px; }
+  .lede code { background: var(--code-bg); padding: 2px 6px; border-radius: 3px; font-size: 14px; }
+  .row { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+  @media (max-width: 800px) { .row { grid-template-columns: 1fr; } }
+  .panel { background: white; border: 1px solid var(--border); border-radius: 6px; padding: 16px; }
+  .panel h2 { font-size: 16px; margin: 0 0 12px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.04em; }
+  .samples { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 12px; }
+  .samples button { padding: 6px 12px; border: 1px solid var(--border); background: white; border-radius: 4px; cursor: pointer; font: inherit; }
+  .samples button:hover { border-color: var(--accent); color: var(--accent); }
+  .samples button.active { background: var(--accent); color: white; border-color: var(--accent); }
+  textarea { width: 100%; min-height: 360px; font: 13px/1.45 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; padding: 12px; border: 1px solid var(--border); border-radius: 4px; resize: vertical; }
+  .actions { margin-top: 12px; display: flex; gap: 8px; align-items: center; }
+  .actions button { padding: 8px 16px; background: var(--accent); color: white; border: none; border-radius: 4px; cursor: pointer; font: inherit; font-weight: 500; }
+  .actions button:hover { opacity: 0.92; }
+  .err { color: #dc2626; margin-left: 12px; }
+  #output { background: white; border: 1px solid var(--border); border-radius: 6px; padding: 24px; min-height: 400px; }
+  #output h1 { font-size: 22px; margin-top: 0; }
+  #output h2 { font-size: 17px; margin-top: 24px; padding-bottom: 6px; border-bottom: 1px solid var(--border); }
+  #output h3 { font-size: 15px; margin-top: 20px; }
+  #output table { border-collapse: collapse; width: 100%; margin: 8px 0; font-size: 14px; }
+  #output th, #output td { border: 1px solid var(--border); padding: 6px 10px; text-align: left; vertical-align: top; }
+  #output th { background: var(--code-bg); }
+  #output code { background: var(--code-bg); padding: 1px 4px; border-radius: 2px; font-size: 13px; }
+  #output blockquote { border-left: 3px solid var(--border); margin: 8px 0; padding-left: 12px; color: var(--muted); }
+  #output sub { color: var(--muted); }
+  footer { text-align: center; color: var(--muted); margin-top: 32px; font-size: 14px; }
+  footer a { color: var(--accent); }
+</style>
+</head>
+<body>
+<div class="container">
+
+<h1>vendor-brief-renderer · live demo</h1>
+<p class="lede">Paste a structured <code>vendor.json</code> (or pick a sample), see the 10-section Markdown brief render in your browser. Same renderer as <a href="https://github.com/andy-bttryzn/vendor-brief-renderer">the npm package</a>, ported to client-side JS.</p>
+
+<div class="row">
+  <div class="panel">
+    <h2>Input</h2>
+    <div class="samples">
+      <button data-sample="acme">Acme Roofing (Live)</button>
+      <button data-sample="beacon">Beacon Solar (Top-tier)</button>
+      <button data-sample="dormant">Northwind (Paused)</button>
+    </div>
+    <textarea id="input" spellcheck="false"></textarea>
+    <div class="actions">
+      <button id="render">Render brief</button>
+      <span id="err" class="err"></span>
+    </div>
+  </div>
+  <div class="panel">
+    <h2>Output</h2>
+    <div id="output"></div>
+  </div>
+</div>
+
+<footer>
+  vendor-brief-renderer is <a href="https://github.com/andy-bttryzn/vendor-brief-renderer">MIT-licensed on GitHub</a> · <a href="https://github.com/andy-bttryzn/vendor-ops-playbook">vendor-ops-playbook</a> · <a href="mailto:andy@bttryzn.com">andy@bttryzn.com</a>
+</footer>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+<script>
+'use strict';
+
+// ---------- Sample data ----------
+
+const SAMPLES = {};
+
+SAMPLES.acme = {
+  vendor: {
+    id: "9876543210",
+    name: "Acme Roofing Network",
+    side: "Buyer",
+    status: "Live",
+    rating: 4,
+    url: "https://acme-roofing.example.com",
+    notes: "Standard ping-post integration. Pays Net-15. Slow to QA returns; chase on the 1st.",
+    sourcing: "Direct (referred by Northwind in Q4 2025)",
+    verticals: { live: ["Roofing"], other: ["Solar"] },
+    modalities: { live: ["Web Leads", "Inbound Calls"], other: [] }
+  },
+  contacts: {
+    active: [
+      { name: "Jane Diaz", role: "Director of Operations", email: "jane@acme-roofing.example.com", phone: "+1 555-0101" },
+      { name: "Tom Reilly", role: "Accounts Payable", email: "ap@acme-roofing.example.com", phone: "" }
+    ],
+    inactive: [
+      { name: "Sarah Park", role: "Former GM (left Aug 2025)", email: "spark@acme-roofing.example.com", phone: "" }
+    ]
+  },
+  tasks: {
+    blockers: [
+      { id: "TASK-501", name: "Confirm Q2 cap raise vs current 150/day", status: "Waiting on Client",
+        notes: "Asked Jane on 5/22. No reply yet.", updatedAt: "2026-05-22T10:00:00Z", url: "https://example.com/tasks/501" }
+    ],
+    ongoing: [
+      { id: "TASK-498", name: "Build state-level reporting view", status: "Waiting on us",
+        notes: "Need to wire up the per-state breakdown by next Friday.", updatedAt: "2026-05-25T14:00:00Z", url: "https://example.com/tasks/498" }
+    ],
+    upcoming: [
+      { id: "TASK-510", name: "Q3 contract amendment - revised pricing", status: "Upcoming",
+        notes: "Targeting July 1 for signature.", updatedAt: "2026-05-15T09:00:00Z", url: "https://example.com/tasks/510" }
+    ],
+    completed: []
+  },
+  links: [
+    { url: "https://example.com/contracts/acme-msa-2025.pdf", notes: "Signed MSA (Oct 2025)" },
+    { url: "https://example.com/tracking/acme", notes: "Acme's lead tracking dashboard" }
+  ],
+  inboxMatrix: [
+    { threadUrl: "https://mail.example.com/thread/abc123", subject: "Re: Q2 cap raise",
+      lastDate: "2026-05-22T10:00:00Z", owner: "Jane", labels: ["00.received", "01.priority", "02.waiting/customer"],
+      summary: "Asked Jane to confirm new daily cap; no reply 8d." },
+    { threadUrl: "https://mail.example.com/thread/def456", subject: "April invoice IWL-9911",
+      lastDate: "2026-05-18T11:30:00Z", owner: "AP", labels: ["00.received", "02.waiting/customer"],
+      summary: "Sent invoice 5/3; partial payment $4,200 of $7,800 received 5/12. Balance outstanding." }
+  ],
+  reference: {
+    "Vendor ID (internal)": "9876543210",
+    "Vendor external ID": "ext_4422",
+    "Return type": "Per-lead via portal",
+    "Payment terms": "Net-15",
+    "Minimum payment threshold": "$0 (no batching)"
+  },
+  synthesis: "Acme is performing reliably on roofing volume but the Q2 cap raise ask is stalled and the April invoice is half-paid 18 days after issue. Both items go through Jane; neither has had a follow-up nudge in the last week. Recommend a single consolidated email today asking for cap decision + balance ETA, then snooze 5d.",
+  openItems: [
+    { text: "Q2 cap raise decision (asked 5/22, no reply)", waitingOn: "Jane @ Acme",
+      sources: [{ label: "thread abc123", url: "https://mail.example.com/thread/abc123" }] },
+    { text: "April invoice IWL-9911 balance $3,600 outstanding 18d", waitingOn: "Acme AP",
+      sources: [{ label: "thread def456", url: "https://mail.example.com/thread/def456" }] },
+    { text: "State-level reporting view promised by 5/29", waitingOn: "us",
+      sources: [{ label: "task 498", url: "https://example.com/tasks/498" }] }
+  ],
+  recommendedActions: [
+    { text: "Send Jane consolidated nudge covering cap decision + invoice balance.", assignee: "me",
+      sources: [{ label: "thread abc123", url: "https://mail.example.com/thread/abc123" }, { label: "thread def456", url: "https://mail.example.com/thread/def456" }] },
+    { text: "Finish state-level reporting view today.", assignee: "me",
+      sources: [{ label: "task 498", url: "https://example.com/tasks/498" }] },
+    { text: "Draft Q3 amendment redline by 6/15.", assignee: "legal",
+      sources: [{ label: "task 510", url: "https://example.com/tasks/510" }] }
+  ],
+  headerMeta: { generatedAt: "2026-05-30T08:45:00Z", scope: "full" }
+};
+
+SAMPLES.beacon = {
+  vendor: {
+    id: "v_001", name: "Beacon Solar Co", side: "Buyer", status: "Live", rating: 5,
+    url: "https://beaconsolar.example.com", sourcing: "Direct (Q1 2026)",
+    notes: "Top-tier buyer. Pays Net-7. Returns processed via portal weekly.",
+    verticals: { live: ["Solar"], other: ["Roofing"] },
+    modalities: { live: ["Web Leads", "Inbound Calls"], other: ["SMS"] }
+  },
+  contacts: {
+    active: [
+      { name: "Maria Chen", role: "Head of Demand", email: "maria@beaconsolar.example.com", phone: "+1 555-0140" },
+      { name: "Devon Park", role: "Accounts Payable", email: "ap@beaconsolar.example.com", phone: "" }
+    ],
+    inactive: [
+      { name: "Lou Rivers", role: "Former Director (left Dec 2025)", email: "lrivers@beaconsolar.example.com", phone: "" }
+    ]
+  },
+  tasks: {
+    blockers: [
+      { id: "t_101", name: "Approve TX cap raise to 300/day", status: "Waiting on us", notes: "Beacon asked 5/26. Tier 1 buyer; recommend approving today.", updatedAt: "2026-05-26T14:00:00Z", url: "https://example.com/tasks/101" }
+    ],
+    ongoing: [
+      { id: "t_102", name: "Schedule Q3 quarterly review", status: "Waiting on us", notes: "Aim for second week of July.", updatedAt: "2026-05-20T09:00:00Z", url: "https://example.com/tasks/102" }
+    ],
+    upcoming: [],
+    completed: [
+      { id: "t_103", name: "Q1 contract renewal countersigned", status: "Done", notes: "Renewal closed 3/15.", updatedAt: "2026-03-15T16:00:00Z", url: "https://example.com/tasks/103" }
+    ]
+  },
+  links: [],
+  inboxMatrix: [],
+  reference: {},
+  synthesis: "Beacon has been clean for 12 weeks running. Current ask is capacity expansion in TX. Recommend approving the cap raise this week and scheduling a quarterly review.",
+  openItems: [],
+  recommendedActions: [],
+  headerMeta: { generatedAt: new Date().toISOString(), scope: "full" }
+};
+
+SAMPLES.dormant = {
+  vendor: {
+    id: "v_022", name: "Northwind Lead Group", side: "Buyer", status: "Paused", rating: 3,
+    url: "https://northwind.example.com", sourcing: "Cold outreach (Q3 2024)",
+    notes: "Paused after Q4 2025 returns dispute. Door is open; no work since Jan.",
+    verticals: { live: [], other: ["Bathroom", "Windows"] },
+    modalities: { live: [], other: ["Web Leads"] }
+  },
+  contacts: {
+    active: [
+      { name: "Pat Adler", role: "VP Acquisition", email: "pat@northwind.example.com", phone: "" }
+    ],
+    inactive: [
+      { name: "Cara Mendes", role: "Former Ops Lead", email: "cara@northwind.example.com", phone: "" }
+    ]
+  },
+  tasks: {
+    blockers: [],
+    ongoing: [],
+    upcoming: [
+      { id: "t_201", name: "Q2 2026 - probe re-engagement", status: "Deferred",
+        notes: "Wait for Pat's industry conference (mid-June) before reaching out.", updatedAt: "2026-04-01T10:00:00Z", url: "https://example.com/tasks/201" }
+    ],
+    completed: [
+      { id: "t_198", name: "Resolve Q4 2025 returns dispute", status: "Done",
+        notes: "Settled at 60% credit. Both sides agreed to pause.", updatedAt: "2026-01-12T15:00:00Z", url: "https://example.com/tasks/198" }
+    ]
+  },
+  links: [
+    { url: "https://example.com/contracts/northwind-msa.pdf", notes: "MSA (still active through 2026)" }
+  ],
+  inboxMatrix: [],
+  reference: {
+    "Last invoice": "2025-12 (paid in full)",
+    "Pause reason": "Returns dispute Q4 2025",
+    "Re-engagement window": "After June 2026 conference"
+  },
+  synthesis: "Northwind is intentionally Paused. Relationship is intact (MSA still active, returns dispute resolved cleanly). No action this month; revisit after Pat's June conference per the deferred task.",
+  openItems: [
+    { text: "Re-engagement probe deferred until mid-June 2026", waitingOn: "us",
+      sources: [{ label: "task 201", url: "https://example.com/tasks/201" }] }
+  ],
+  recommendedActions: [
+    { text: "No action. Hold until June. Don't churn the contact.", assignee: "me",
+      sources: [{ label: "task 201", url: "https://example.com/tasks/201" }] }
+  ],
+  headerMeta: { generatedAt: new Date().toISOString(), scope: "full" }
+};
+
+// ---------- Renderer (ported from index.js) ----------
+
+function esc(s) {
+  if (s === null || s === undefined) return '';
+  return String(s).replace(/\|/g, '\\|');
+}
+function fmtDate(s) {
+  if (!s) return '';
+  const d = new Date(s);
+  if (isNaN(d.getTime())) return String(s);
+  return d.toISOString().slice(0, 10);
+}
+function link(text, url) {
+  if (!url) return text || '';
+  return `[${text || url}](${url})`;
+}
+function joinList(items) {
+  if (!items || !items.length) return '_none_';
+  return items.join(', ');
+}
+
+function section1Header(v) {
+  const lines = [];
+  const name = v.vendor?.name || '_unnamed_';
+  lines.push(`# ${name}`);
+  const tags = [];
+  if (v.vendor?.side) tags.push(v.vendor.side);
+  if (v.vendor?.status) tags.push(v.vendor.status);
+  if (v.vendor?.rating) tags.push(`★ ${v.vendor.rating}`);
+  if (tags.length) lines.push(`**${tags.join(' · ')}**`);
+  if (v.vendor?.url) lines.push(`<${v.vendor.url}>`);
+  const meta = v.headerMeta || {};
+  const sub = [];
+  if (meta.generatedAt) sub.push(`generated: ${fmtDate(meta.generatedAt)}`);
+  if (meta.scope) sub.push(`scope: ${meta.scope}`);
+  if (meta.triggerThreadId) sub.push(`trigger: ${meta.triggerThreadId}`);
+  if (sub.length) lines.push(`<sub>${sub.join(' · ')}</sub>`);
+  return lines.join('\n\n');
+}
+
+function section2Summary(v) {
+  const vendor = v.vendor || {};
+  const lines = ['## 2. Summary', ''];
+  const rows = [
+    ['Side', vendor.side],
+    ['Status', vendor.status],
+    ['Rating', vendor.rating ? `★ ${vendor.rating}` : null],
+    ['Verticals (live)', joinList(vendor.verticals?.live)],
+    ['Verticals (other)', joinList(vendor.verticals?.other)],
+    ['Modalities (live)', joinList(vendor.modalities?.live)],
+    ['Modalities (other)', joinList(vendor.modalities?.other)],
+    ['Sourcing', vendor.sourcing],
+    ['Website', vendor.url],
+    ['Notes', vendor.notes],
+  ].filter(([, val]) => val !== null && val !== undefined && val !== '');
+  if (!rows.length) return null;
+  lines.push('| Field | Value |');
+  lines.push('| --- | --- |');
+  for (const [k, vv] of rows) lines.push(`| ${esc(k)} | ${esc(vv)} |`);
+  return lines.join('\n');
+}
+
+function section3Contacts(v) {
+  const contacts = v.contacts || {};
+  const active = contacts.active || [];
+  const inactive = contacts.inactive || [];
+  if (!active.length && !inactive.length) return null;
+  const lines = ['## 3. Contacts', ''];
+  function renderGroup(label, list) {
+    if (!list.length) return;
+    lines.push(`**${label}**`);
+    lines.push('');
+    lines.push('| Name | Role | Email | Phone |');
+    lines.push('| --- | --- | --- | --- |');
+    for (const c of list) lines.push(`| ${esc(c.name)} | ${esc(c.role)} | ${esc(c.email)} | ${esc(c.phone)} |`);
+    lines.push('');
+  }
+  renderGroup('Active', active);
+  renderGroup('Inactive', inactive);
+  return lines.join('\n').trim();
+}
+
+function section4InboxMatrix(v) {
+  const threads = v.inboxMatrix || [];
+  if (!threads.length) return null;
+  const lines = ['## 4. Inbox matrix', ''];
+  lines.push('| Subject | Last activity | Owner | Labels | Summary |');
+  lines.push('| --- | --- | --- | --- | --- |');
+  for (const t of threads) {
+    const subj = link(t.subject || '(no subject)', t.threadUrl);
+    lines.push(`| ${esc(subj)} | ${esc(fmtDate(t.lastDate))} | ${esc(t.owner || '—')} | ${esc((t.labels || []).join(', '))} | ${esc(t.summary || '—')} |`);
+  }
+  return lines.join('\n');
+}
+
+function section5HelpfulLinks(v) {
+  const links = v.links || [];
+  if (!links.length) return null;
+  const lines = ['## 5. Helpful Links', ''];
+  for (const l of links) {
+    const name = l.notes || l.url;
+    lines.push(`- ${link(name, l.url)}${l.notes && l.url ? `  \n  ${esc(l.url)}` : ''}`);
+  }
+  return lines.join('\n');
+}
+
+function section6Tasks(v) {
+  const tasks = v.tasks || {};
+  const groupOrder = ['blockers', 'ongoing', 'upcoming', 'completed'];
+  const groupLabels = { blockers: 'Blockers', ongoing: 'Ongoing', upcoming: 'Upcoming / Paused', completed: 'Completed' };
+  const anyHasTasks = groupOrder.some(g => (tasks[g] || []).length);
+  if (!anyHasTasks) return null;
+  const lines = ['## 6. Tasks', ''];
+  for (const g of groupOrder) {
+    const list = tasks[g] || [];
+    if (!list.length) continue;
+    lines.push(`### ${groupLabels[g]}`);
+    lines.push('');
+    for (const t of list) {
+      const head = `- ${link(t.name, t.url)}`;
+      const meta = [];
+      if (t.status) meta.push(`status: ${t.status}`);
+      if (t.updatedAt) meta.push(`updated: ${fmtDate(t.updatedAt)}`);
+      lines.push(meta.length ? `${head}  \n  _${meta.join(' · ')}_` : head);
+      if (t.notes) lines.push(`  > ${esc(t.notes).split('\n').join('\n  > ')}`);
+    }
+    lines.push('');
+  }
+  return lines.join('\n').trim();
+}
+
+function section7Reference(v) {
+  const ref = v.reference || {};
+  const entries = Object.entries(ref).filter(([, val]) => val !== null && val !== undefined && val !== '');
+  if (!entries.length) return null;
+  const lines = ['## 7. Reference', ''];
+  for (const [k, val] of entries) lines.push(`- **${esc(k)}**: ${esc(val)}`);
+  return lines.join('\n');
+}
+
+function section8Synthesis(v) {
+  const s = v.synthesis;
+  if (!s) return null;
+  return ['## 8. Synthesis', '', String(s).trim()].join('\n');
+}
+
+function sourcesLine(sources) {
+  if (!sources || !sources.length) return '';
+  const parts = sources.map(s => typeof s === 'string' ? s : link(s.label || s.url, s.url));
+  return `  \n  _Sources: ${parts.join('; ')}_`;
+}
+
+function section9OpenItems(v) {
+  const items = v.openItems || [];
+  if (!items.length) return null;
+  const lines = ['## 9. Open Items', ''];
+  for (const it of items) {
+    let head = `- ${esc(it.text)}`;
+    if (it.waitingOn) head += ` _(waiting on ${esc(it.waitingOn)})_`;
+    lines.push(head + sourcesLine(it.sources));
+  }
+  return lines.join('\n');
+}
+
+function section10RecommendedActions(v) {
+  const items = v.recommendedActions || [];
+  if (!items.length) return null;
+  const lines = ['## 10. Recommended Actions', ''];
+  items.forEach((it, idx) => {
+    let head = `${idx + 1}. ${esc(it.text)}`;
+    if (it.assignee) head += ` _[${esc(it.assignee)}]_`;
+    lines.push(head + sourcesLine(it.sources));
+  });
+  return lines.join('\n');
+}
+
+const SECTIONS = [
+  section1Header, section2Summary, section3Contacts, section4InboxMatrix,
+  section5HelpfulLinks, section6Tasks, section7Reference,
+  section8Synthesis, section9OpenItems, section10RecommendedActions,
+];
+
+function render(vendor, opts = {}) {
+  const out = [];
+  for (const fn of SECTIONS) {
+    let rendered;
+    try { rendered = fn(vendor); }
+    catch (e) { rendered = `_(error rendering: ${e.message})_`; }
+    if (!rendered) {
+      if (opts.noEmpty) continue;
+      continue; // for the demo, drop empty sections by default for cleaner output
+    }
+    out.push(rendered);
+  }
+  return out.join('\n\n') + '\n';
+}
+
+// ---------- UI wiring ----------
+
+const $input = document.getElementById('input');
+const $output = document.getElementById('output');
+const $err = document.getElementById('err');
+const $renderBtn = document.getElementById('render');
+const $samples = document.querySelectorAll('.samples button');
+
+function loadSample(key) {
+  $input.value = JSON.stringify(SAMPLES[key], null, 2);
+  $samples.forEach(b => b.classList.toggle('active', b.dataset.sample === key));
+  doRender();
+}
+
+function doRender() {
+  $err.textContent = '';
+  let parsed;
+  try {
+    parsed = JSON.parse($input.value);
+  } catch (e) {
+    $err.textContent = 'Invalid JSON: ' + e.message;
+    return;
+  }
+  if (parsed === null || typeof parsed !== 'object' || Array.isArray(parsed)) {
+    $err.textContent = 'Input must be a JSON object.';
+    return;
+  }
+  try {
+    const md = render(parsed);
+    // marked.js renders the Markdown to HTML; we accept the literal <sub> + <https://...> tags too.
+    $output.innerHTML = marked.parse(md, { breaks: false });
+  } catch (e) {
+    $err.textContent = 'Render error: ' + e.message;
+  }
+}
+
+$samples.forEach(b => b.addEventListener('click', () => loadSample(b.dataset.sample)));
+$renderBtn.addEventListener('click', doRender);
+
+// Load Acme on first paint
+loadSample('acme');
+</script>
+</body>
+</html>

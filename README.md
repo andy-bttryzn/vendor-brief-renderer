@@ -113,6 +113,10 @@ See `examples/example-vendor.json` and `examples/example-output.md` for a full w
 
 See `examples/csv-adapter/` for an end-to-end pipeline showing how to turn data from a real source (CSVs in the example, but it could be monday / Salesforce / Airtable / your DB) into `vendor.json` and feed it to the renderer.
 
+## Browser demo
+
+`demo/index.html` is a self-contained single-file demo: open it in any browser, pick a sample vendor (Live / Top-tier / Paused), see the brief render. Or paste your own `vendor.json` in the left panel. No build step, no hosting required.
+
 ## Tests
 
 ```bash
