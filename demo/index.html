@@ -3,77 +3,131 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>vendor-brief-renderer · live demo</title>
+<title>vendor-brief-renderer · the morning question</title>
 <style>
   :root {
-    --bg: #fafafa;
-    --fg: #1a1a1a;
+    --bg: #f6f7f9;
+    --fg: #111827;
     --muted: #6b7280;
+    --muted-2: #9ca3af;
     --border: #e5e7eb;
+    --border-strong: #d1d5db;
     --accent: #1f6feb;
+    --accent-soft: #dbeafe;
+    --warn: #d97706;
+    --warn-soft: #fef3c7;
+    --good: #059669;
+    --bad: #dc2626;
     --code-bg: #f3f4f6;
+    --thread-bg: #fcfcfd;
   }
   * { box-sizing: border-box; }
-  body { font: 16px/1.55 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; color: var(--fg); background: var(--bg); margin: 0; padding: 24px; }
-  .container { max-width: 1100px; margin: 0 auto; }
-  h1 { font-size: 24px; margin: 0 0 4px; }
-  .lede { color: var(--muted); margin: 0 0 24px; }
-  .lede code { background: var(--code-bg); padding: 2px 6px; border-radius: 3px; font-size: 14px; }
-  .row { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
-  @media (max-width: 800px) { .row { grid-template-columns: 1fr; } }
-  .panel { background: white; border: 1px solid var(--border); border-radius: 6px; padding: 16px; }
-  .panel h2 { font-size: 16px; margin: 0 0 12px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.04em; }
-  .samples { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 12px; }
-  .samples button { padding: 6px 12px; border: 1px solid var(--border); background: white; border-radius: 4px; cursor: pointer; font: inherit; }
-  .samples button:hover { border-color: var(--accent); color: var(--accent); }
-  .samples button.active { background: var(--accent); color: white; border-color: var(--accent); }
-  textarea { width: 100%; min-height: 360px; font: 13px/1.45 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; padding: 12px; border: 1px solid var(--border); border-radius: 4px; resize: vertical; }
-  .actions { margin-top: 12px; display: flex; gap: 8px; align-items: center; }
-  .actions button { padding: 8px 16px; background: var(--accent); color: white; border: none; border-radius: 4px; cursor: pointer; font: inherit; font-weight: 500; }
-  .actions button:hover { opacity: 0.92; }
-  .err { color: #dc2626; margin-left: 12px; }
-  #output { background: white; border: 1px solid var(--border); border-radius: 6px; padding: 24px; min-height: 400px; }
-  #output h1 { font-size: 22px; margin-top: 0; }
-  #output h2 { font-size: 17px; margin-top: 24px; padding-bottom: 6px; border-bottom: 1px solid var(--border); }
-  #output h3 { font-size: 15px; margin-top: 20px; }
-  #output table { border-collapse: collapse; width: 100%; margin: 8px 0; font-size: 14px; }
-  #output th, #output td { border: 1px solid var(--border); padding: 6px 10px; text-align: left; vertical-align: top; }
-  #output th { background: var(--code-bg); }
-  #output code { background: var(--code-bg); padding: 1px 4px; border-radius: 2px; font-size: 13px; }
-  #output blockquote { border-left: 3px solid var(--border); margin: 8px 0; padding-left: 12px; color: var(--muted); }
-  #output sub { color: var(--muted); }
-  footer { text-align: center; color: var(--muted); margin-top: 32px; font-size: 14px; }
+  html, body { margin: 0; }
+  body { font: 15px/1.55 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; color: var(--fg); background: var(--bg); padding: 20px; }
+  .container { max-width: 1280px; margin: 0 auto; }
+  header { margin-bottom: 20px; }
+  h1 { font-size: 22px; margin: 0 0 4px; }
+  .lede { color: var(--muted); margin: 0; max-width: 760px; }
+
+  .scenario-bar { margin: 20px 0 16px; display: flex; gap: 8px; flex-wrap: wrap; }
+  .scenario-bar button { padding: 8px 14px; background: white; border: 1px solid var(--border-strong); border-radius: 6px; cursor: pointer; font: inherit; transition: border-color 0.12s ease; }
+  .scenario-bar button:hover { border-color: var(--accent); }
+  .scenario-bar button.active { background: var(--accent); color: white; border-color: var(--accent); }
+
+  .scenario-trigger { background: var(--accent-soft); border-left: 3px solid var(--accent); padding: 12px 16px; border-radius: 0 6px 6px 0; margin-bottom: 16px; }
+  .scenario-trigger .when { color: var(--muted); font-size: 13px; }
+  .scenario-trigger .what { font-weight: 600; margin-top: 2px; }
+
+  .row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  @media (max-width: 1000px) { .row { grid-template-columns: 1fr; } }
+
+  .panel { background: white; border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }
+  .panel header { padding: 12px 16px; border-bottom: 1px solid var(--border); margin: 0; background: var(--thread-bg); }
+  .panel h2 { font-size: 13px; margin: 0; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; }
+  .panel h2 .meta { font-weight: 400; text-transform: none; letter-spacing: 0; color: var(--muted-2); font-size: 12px; }
+  .panel-body { padding: 16px; }
+
+  /* Scrolling view (left) — looks like a messy inbox */
+  .threads .thread { border-bottom: 1px solid var(--border); padding: 12px 0; }
+  .threads .thread:last-child { border-bottom: 0; }
+  .threads .thread-meta { display: flex; gap: 8px; font-size: 12px; color: var(--muted); margin-bottom: 4px; }
+  .threads .thread-meta .from { color: var(--fg); font-weight: 500; }
+  .threads .thread-subject { font-weight: 500; margin-bottom: 4px; }
+  .threads .thread-snippet { font-size: 13px; color: var(--muted); }
+  .threads .nothing-relevant { color: var(--muted-2); font-style: italic; padding: 8px 0; font-size: 13px; }
+
+  /* Brief view (right) */
+  .brief-callout { background: var(--warn-soft); border-left: 3px solid var(--warn); padding: 10px 14px; border-radius: 0 6px 6px 0; margin: 0 0 14px; font-size: 14px; }
+  .brief-callout strong { color: var(--warn); }
+  #brief-output h1 { font-size: 19px; margin-top: 0; }
+  #brief-output h2 { font-size: 14px; margin-top: 20px; padding-bottom: 4px; border-bottom: 1px solid var(--border); color: var(--muted); text-transform: uppercase; letter-spacing: 0.04em; }
+  #brief-output h3 { font-size: 13px; margin-top: 16px; color: var(--muted); }
+  #brief-output table { border-collapse: collapse; width: 100%; margin: 6px 0; font-size: 13px; }
+  #brief-output th, #brief-output td { border: 1px solid var(--border); padding: 5px 8px; text-align: left; vertical-align: top; }
+  #brief-output th { background: var(--code-bg); }
+  #brief-output a { color: var(--accent); }
+  #brief-output code { background: var(--code-bg); padding: 1px 4px; border-radius: 2px; font-size: 12px; }
+  #brief-output blockquote { border-left: 2px solid var(--border-strong); margin: 6px 0; padding: 2px 12px; color: var(--muted); font-size: 13px; }
+  #brief-output sub { color: var(--muted); display: block; margin-top: 6px; font-size: 12px; }
+
+  details.byo { margin-top: 24px; }
+  details.byo summary { cursor: pointer; padding: 10px 14px; background: white; border: 1px solid var(--border); border-radius: 6px; user-select: none; font-weight: 500; }
+  details.byo summary:hover { border-color: var(--accent); }
+  details.byo[open] summary { border-bottom-left-radius: 0; border-bottom-right-radius: 0; }
+  details.byo .byo-body { background: white; border: 1px solid var(--border); border-top: 0; border-radius: 0 0 6px 6px; padding: 16px; }
+  details.byo textarea { width: 100%; min-height: 240px; font: 12px/1.4 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; padding: 10px; border: 1px solid var(--border-strong); border-radius: 4px; resize: vertical; }
+  details.byo .actions { margin-top: 10px; display: flex; gap: 8px; align-items: center; }
+  details.byo .actions button { padding: 8px 14px; background: var(--accent); color: white; border: 0; border-radius: 4px; cursor: pointer; font: inherit; font-weight: 500; }
+  .err { color: var(--bad); font-size: 13px; }
+
+  footer { text-align: center; color: var(--muted); margin-top: 28px; font-size: 13px; }
   footer a { color: var(--accent); }
 </style>
 </head>
 <body>
 <div class="container">
 
-<h1>vendor-brief-renderer · live demo</h1>
-<p class="lede">Paste a structured <code>vendor.json</code> (or pick a sample), see the 10-section Markdown brief render in your browser. Same renderer as <a href="https://github.com/andy-bttryzn/vendor-brief-renderer">the npm package</a>, ported to client-side JS.</p>
+<header>
+  <h1>The morning question: where are we with this vendor?</h1>
+  <p class="lede">Three scenarios. Same vendor, opened from your inbox. Left: what you'd see scrolling through the threads. Right: what the brief surfaces. The brief is built from a structured <code>vendor.json</code> — the renderer is on <a href="https://github.com/andy-bttryzn/vendor-brief-renderer">GitHub</a>.</p>
+</header>
+
+<div class="scenario-bar">
+  <button data-scenario="acme">Acme Roofing · stalled cap raise</button>
+  <button data-scenario="beacon">Beacon Solar · top-tier ask</button>
+  <button data-scenario="dormant">Northwind · dormant re-engagement</button>
+</div>
+
+<div id="scenario-trigger" class="scenario-trigger"></div>
 
 <div class="row">
   <div class="panel">
-    <h2>Input</h2>
-    <div class="samples">
-      <button data-sample="acme">Acme Roofing (Live)</button>
-      <button data-sample="beacon">Beacon Solar (Top-tier)</button>
-      <button data-sample="dormant">Northwind (Paused)</button>
-    </div>
-    <textarea id="input" spellcheck="false"></textarea>
-    <div class="actions">
-      <button id="render">Render brief</button>
-      <span id="err" class="err"></span>
-    </div>
+    <header><h2>What scrolling shows you <span class="meta" id="left-meta"></span></h2></header>
+    <div class="panel-body threads" id="threads"></div>
   </div>
   <div class="panel">
-    <h2>Output</h2>
-    <div id="output"></div>
+    <header><h2>What the brief surfaces <span class="meta">rendered from vendor.json</span></h2></header>
+    <div class="panel-body">
+      <div id="brief-callout" class="brief-callout"></div>
+      <div id="brief-output"></div>
+    </div>
   </div>
 </div>
 
+<details class="byo">
+  <summary>Bring your own vendor.json (paste, render)</summary>
+  <div class="byo-body">
+    <textarea id="byo-input" spellcheck="false" placeholder='{ "vendor": { "name": "...", "side": "Buyer" }, ... }'></textarea>
+    <div class="actions">
+      <button id="byo-render">Render</button>
+      <span id="byo-err" class="err"></span>
+    </div>
+    <div id="byo-output" style="margin-top: 14px;"></div>
+  </div>
+</details>
+
 <footer>
-  vendor-brief-renderer is <a href="https://github.com/andy-bttryzn/vendor-brief-renderer">MIT-licensed on GitHub</a> · <a href="https://github.com/andy-bttryzn/vendor-ops-playbook">vendor-ops-playbook</a> · <a href="mailto:andy@bttryzn.com">andy@bttryzn.com</a>
+  <a href="https://github.com/andy-bttryzn/vendor-brief-renderer">vendor-brief-renderer</a> · <a href="https://github.com/andy-bttryzn/vendor-ops-playbook">vendor-ops-playbook</a> · <a href="https://github.com/andy-bttryzn/aiden-overview">aiden-overview</a> · <a href="mailto:andy@bttryzn.com">andy@bttryzn.com</a>
 </footer>
 
 </div>
@@ -82,411 +136,278 @@
 <script>
 'use strict';
 
-// ---------- Sample data ----------
+// ---------- Scenarios ----------
+// Each scenario has:
+//   trigger     - the moment you'd open this vendor's view
+//   threads     - what you'd see in your inbox if you scrolled (raw, dated, owner-tagged)
+//   callout     - the one specific thing the brief catches that you'd miss
+//   vendor      - the full vendor.json the renderer consumes
 
-const SAMPLES = {};
+const SCENARIOS = {};
 
-SAMPLES.acme = {
+SCENARIOS.acme = {
+  trigger: {
+    when: 'Monday, 7:42am',
+    what: 'Jane at Acme Roofing emailed Friday asking to raise their daily cap from 150 → 300 in TX and FL. You haven\'t replied yet.'
+  },
+  threadsMeta: '8 threads tagged Acme Roofing in the last 30 days',
+  threads: [
+    { from: 'Jane Diaz (Acme)', date: 'Fri 4:14 PM', subject: 'Re: Q2 cap raise', snippet: 'Hey Andy — circling back on the cap raise to 300/day for TX + FL. Need to lock in for next week\'s media plan. Let me know.' },
+    { from: 'You', date: 'Wed 11:02 AM', subject: 'Quick check on May numbers', snippet: 'Hey Jane, May volume tracked at 88% of expected — anything we should know on your end? Numbers attached.' },
+    { from: 'AP @ Acme', date: 'Tue 5:38 PM', subject: 'Re: April invoice IWL-9911', snippet: 'Partial payment of $4,200 of the $7,800 went out yesterday. Working on the rest.' },
+    { from: 'Jane Diaz (Acme)', date: 'May 22 10:14 AM', subject: 'Q2 cap raise', snippet: 'Got the OK from our side to push to 300/day in TX and FL for the rest of Q2. Can you confirm capacity on the supply side?' },
+    { from: 'You', date: 'May 18 9:01 AM', subject: 'Re: April invoice IWL-9911', snippet: 'Hi AP — April invoice $7,800 attached, due 5/18. Let me know if anything looks off.' },
+    { from: 'Acme billing', date: 'May 12 12:00 AM', subject: 'Payment confirmation #84421', snippet: 'Auto-generated. Payment of $4,200 received for invoice IWL-9911.' },
+  ],
+  callout: {
+    text: 'Cap raise asked <strong>8 days ago</strong>. No follow-up nudge has fired. Partial-paid invoice is sitting at <strong>$3,600 outstanding, 18 days post-issue</strong>. Both go through Jane. <strong>Send one consolidated reply.</strong>'
+  },
   vendor: {
-    id: "9876543210",
-    name: "Acme Roofing Network",
-    side: "Buyer",
-    status: "Live",
-    rating: 4,
-    url: "https://acme-roofing.example.com",
-    notes: "Standard ping-post integration. Pays Net-15. Slow to QA returns; chase on the 1st.",
-    sourcing: "Direct (referred by Northwind in Q4 2025)",
-    verticals: { live: ["Roofing"], other: ["Solar"] },
-    modalities: { live: ["Web Leads", "Inbound Calls"], other: [] }
-  },
-  contacts: {
-    active: [
-      { name: "Jane Diaz", role: "Director of Operations", email: "jane@acme-roofing.example.com", phone: "+1 555-0101" },
-      { name: "Tom Reilly", role: "Accounts Payable", email: "ap@acme-roofing.example.com", phone: "" }
+    vendor: { id: "9876543210", name: "Acme Roofing Network", side: "Buyer", status: "Live", rating: 4, url: "https://acme-roofing.example.com",
+      notes: "Standard ping-post. Pays Net-15. Slow to QA returns; chase on the 1st.",
+      sourcing: "Direct (referred by Northwind in Q4 2025)",
+      verticals: { live: ["Roofing"], other: ["Solar"] }, modalities: { live: ["Web Leads", "Inbound Calls"], other: [] } },
+    contacts: {
+      active: [
+        { name: "Jane Diaz", role: "Director of Operations", email: "jane@acme-roofing.example.com", phone: "+1 555-0101" },
+        { name: "Tom Reilly", role: "Accounts Payable", email: "ap@acme-roofing.example.com", phone: "" }
+      ],
+      inactive: [{ name: "Sarah Park", role: "Former GM (left Aug 2025)", email: "spark@acme-roofing.example.com", phone: "" }]
+    },
+    tasks: {
+      blockers: [{ id: "TASK-501", name: "Confirm Q2 cap raise vs current 150/day", status: "Waiting on Client",
+        notes: "Asked Jane 5/22. No reply yet.", updatedAt: "2026-05-22T10:00:00Z", url: "https://example.com/tasks/501" }],
+      ongoing: [{ id: "TASK-498", name: "Build state-level reporting view", status: "Waiting on us",
+        notes: "Per-state breakdown by next Friday.", updatedAt: "2026-05-25T14:00:00Z", url: "https://example.com/tasks/498" }],
+      upcoming: [{ id: "TASK-510", name: "Q3 contract amendment - revised pricing", status: "Upcoming",
+        notes: "Targeting July 1.", updatedAt: "2026-05-15T09:00:00Z", url: "https://example.com/tasks/510" }],
+      completed: []
+    },
+    links: [
+      { url: "https://example.com/contracts/acme-msa-2025.pdf", notes: "Signed MSA (Oct 2025)" },
+      { url: "https://example.com/tracking/acme", notes: "Acme's lead tracking dashboard" }
     ],
-    inactive: [
-      { name: "Sarah Park", role: "Former GM (left Aug 2025)", email: "spark@acme-roofing.example.com", phone: "" }
-    ]
-  },
-  tasks: {
-    blockers: [
-      { id: "TASK-501", name: "Confirm Q2 cap raise vs current 150/day", status: "Waiting on Client",
-        notes: "Asked Jane on 5/22. No reply yet.", updatedAt: "2026-05-22T10:00:00Z", url: "https://example.com/tasks/501" }
+    inboxMatrix: [
+      { threadUrl: "https://mail.example.com/thread/abc123", subject: "Re: Q2 cap raise", lastDate: "2026-05-22T10:00:00Z",
+        owner: "Jane", labels: ["00.received", "01.priority", "02.waiting/customer"],
+        summary: "Asked Jane to confirm new daily cap; no reply 8d." },
+      { threadUrl: "https://mail.example.com/thread/def456", subject: "April invoice IWL-9911", lastDate: "2026-05-18T11:30:00Z",
+        owner: "AP", labels: ["00.received", "02.waiting/customer"],
+        summary: "Sent invoice 5/3; partial payment $4,200 of $7,800 received 5/12. Balance outstanding." }
     ],
-    ongoing: [
-      { id: "TASK-498", name: "Build state-level reporting view", status: "Waiting on us",
-        notes: "Need to wire up the per-state breakdown by next Friday.", updatedAt: "2026-05-25T14:00:00Z", url: "https://example.com/tasks/498" }
+    reference: { "Return type": "Per-lead via portal", "Payment terms": "Net-15", "Min payment threshold": "$0 (no batching)" },
+    synthesis: "Acme is performing reliably on roofing volume but the Q2 cap raise ask is stalled 8 days and the April invoice is half-paid 18 days post-issue. Both items go through Jane; neither has had a follow-up nudge. Recommend a single consolidated email today asking for cap decision + balance ETA, then snooze 5d.",
+    openItems: [
+      { text: "Q2 cap raise decision (asked 5/22, no reply)", waitingOn: "Jane @ Acme",
+        sources: [{ label: "thread abc123", url: "https://mail.example.com/thread/abc123" }] },
+      { text: "April invoice IWL-9911 balance $3,600 outstanding 18d", waitingOn: "Acme AP",
+        sources: [{ label: "thread def456", url: "https://mail.example.com/thread/def456" }] },
+      { text: "State-level reporting view promised by 5/29", waitingOn: "us",
+        sources: [{ label: "task 498", url: "https://example.com/tasks/498" }] }
     ],
-    upcoming: [
-      { id: "TASK-510", name: "Q3 contract amendment - revised pricing", status: "Upcoming",
-        notes: "Targeting July 1 for signature.", updatedAt: "2026-05-15T09:00:00Z", url: "https://example.com/tasks/510" }
+    recommendedActions: [
+      { text: "Send Jane consolidated nudge covering cap decision + invoice balance.", assignee: "me",
+        sources: [{ label: "thread abc123", url: "https://mail.example.com/thread/abc123" }, { label: "thread def456", url: "https://mail.example.com/thread/def456" }] },
+      { text: "Finish state-level reporting view today.", assignee: "me",
+        sources: [{ label: "task 498", url: "https://example.com/tasks/498" }] },
+      { text: "Draft Q3 amendment redline by 6/15.", assignee: "legal",
+        sources: [{ label: "task 510", url: "https://example.com/tasks/510" }] }
     ],
-    completed: []
-  },
-  links: [
-    { url: "https://example.com/contracts/acme-msa-2025.pdf", notes: "Signed MSA (Oct 2025)" },
-    { url: "https://example.com/tracking/acme", notes: "Acme's lead tracking dashboard" }
-  ],
-  inboxMatrix: [
-    { threadUrl: "https://mail.example.com/thread/abc123", subject: "Re: Q2 cap raise",
-      lastDate: "2026-05-22T10:00:00Z", owner: "Jane", labels: ["00.received", "01.priority", "02.waiting/customer"],
-      summary: "Asked Jane to confirm new daily cap; no reply 8d." },
-    { threadUrl: "https://mail.example.com/thread/def456", subject: "April invoice IWL-9911",
-      lastDate: "2026-05-18T11:30:00Z", owner: "AP", labels: ["00.received", "02.waiting/customer"],
-      summary: "Sent invoice 5/3; partial payment $4,200 of $7,800 received 5/12. Balance outstanding." }
-  ],
-  reference: {
-    "Vendor ID (internal)": "9876543210",
-    "Vendor external ID": "ext_4422",
-    "Return type": "Per-lead via portal",
-    "Payment terms": "Net-15",
-    "Minimum payment threshold": "$0 (no batching)"
-  },
-  synthesis: "Acme is performing reliably on roofing volume but the Q2 cap raise ask is stalled and the April invoice is half-paid 18 days after issue. Both items go through Jane; neither has had a follow-up nudge in the last week. Recommend a single consolidated email today asking for cap decision + balance ETA, then snooze 5d.",
-  openItems: [
-    { text: "Q2 cap raise decision (asked 5/22, no reply)", waitingOn: "Jane @ Acme",
-      sources: [{ label: "thread abc123", url: "https://mail.example.com/thread/abc123" }] },
-    { text: "April invoice IWL-9911 balance $3,600 outstanding 18d", waitingOn: "Acme AP",
-      sources: [{ label: "thread def456", url: "https://mail.example.com/thread/def456" }] },
-    { text: "State-level reporting view promised by 5/29", waitingOn: "us",
-      sources: [{ label: "task 498", url: "https://example.com/tasks/498" }] }
-  ],
-  recommendedActions: [
-    { text: "Send Jane consolidated nudge covering cap decision + invoice balance.", assignee: "me",
-      sources: [{ label: "thread abc123", url: "https://mail.example.com/thread/abc123" }, { label: "thread def456", url: "https://mail.example.com/thread/def456" }] },
-    { text: "Finish state-level reporting view today.", assignee: "me",
-      sources: [{ label: "task 498", url: "https://example.com/tasks/498" }] },
-    { text: "Draft Q3 amendment redline by 6/15.", assignee: "legal",
-      sources: [{ label: "task 510", url: "https://example.com/tasks/510" }] }
-  ],
-  headerMeta: { generatedAt: "2026-05-30T08:45:00Z", scope: "full" }
+    headerMeta: { generatedAt: "2026-06-01T07:42:00Z", scope: "full" }
+  }
 };
 
-SAMPLES.beacon = {
+SCENARIOS.beacon = {
+  trigger: {
+    when: 'Monday, 6:08am',
+    what: 'Maria Chen at Beacon Solar emailed before 6am asking to push TX cap to 300/day. Beacon is a top-tier buyer. You\'re reading this on your phone.'
+  },
+  threadsMeta: '4 threads tagged Beacon Solar in the last 30 days',
+  threads: [
+    { from: 'Maria Chen (Beacon)', date: 'Today 5:48 AM', subject: 'Raising TX cap to 300/day?', snippet: 'Andy — we\'re seeing strong conversion on the TX traffic. Want to push cap to 300/day starting Wednesday. Can you confirm capacity?' },
+    { from: 'Maria Chen (Beacon)', date: 'May 24 3:01 PM', subject: 'Q3 review timing', snippet: 'When does your calendar look good for a Q3 review? Mid-July?' },
+    { from: 'You', date: 'May 20 9:30 AM', subject: 'Re: April returns', snippet: 'Portal updated. April returns processed: 18 leads at $42/each. Credit applied to May invoice. Thanks!' },
+    { from: 'Beacon AP', date: 'May 8 11:15 AM', subject: 'Payment confirmation', snippet: 'IWL-9802 paid in full. Net-7, as always.' },
+  ],
+  callout: {
+    text: 'Beacon is Tier-5, Net-7, clean for 12 weeks. The brief flags: <strong>no Blockers, no outstanding invoices, Q3 review still unscheduled</strong>. Recommend approving cap raise AND scheduling the Q3 review in the same reply — bundle the two open items.'
+  },
   vendor: {
-    id: "v_001", name: "Beacon Solar Co", side: "Buyer", status: "Live", rating: 5,
-    url: "https://beaconsolar.example.com", sourcing: "Direct (Q1 2026)",
-    notes: "Top-tier buyer. Pays Net-7. Returns processed via portal weekly.",
-    verticals: { live: ["Solar"], other: ["Roofing"] },
-    modalities: { live: ["Web Leads", "Inbound Calls"], other: ["SMS"] }
-  },
-  contacts: {
-    active: [
-      { name: "Maria Chen", role: "Head of Demand", email: "maria@beaconsolar.example.com", phone: "+1 555-0140" },
-      { name: "Devon Park", role: "Accounts Payable", email: "ap@beaconsolar.example.com", phone: "" }
+    vendor: { id: "v_001", name: "Beacon Solar Co", side: "Buyer", status: "Live", rating: 5,
+      url: "https://beaconsolar.example.com", sourcing: "Direct (Q1 2026)",
+      notes: "Top-tier. Pays Net-7. Returns processed via portal weekly. Maria is the relationship.",
+      verticals: { live: ["Solar"], other: ["Roofing"] }, modalities: { live: ["Web Leads", "Inbound Calls"], other: ["SMS"] } },
+    contacts: {
+      active: [
+        { name: "Maria Chen", role: "Head of Demand", email: "maria@beaconsolar.example.com", phone: "+1 555-0140" },
+        { name: "Devon Park", role: "Accounts Payable", email: "ap@beaconsolar.example.com", phone: "" }
+      ],
+      inactive: [{ name: "Lou Rivers", role: "Former Director (left Dec 2025)", email: "lrivers@beaconsolar.example.com", phone: "" }]
+    },
+    tasks: {
+      blockers: [],
+      ongoing: [
+        { id: "t_101", name: "Approve TX cap raise to 300/day", status: "Waiting on us",
+          notes: "Beacon asked this morning. Tier 1 buyer; recommend approving today.", updatedAt: "2026-06-01T06:08:00Z", url: "https://example.com/tasks/101" },
+        { id: "t_102", name: "Schedule Q3 quarterly review", status: "Waiting on us",
+          notes: "Maria asked 5/24. Second week of July looks open.", updatedAt: "2026-05-24T15:00:00Z", url: "https://example.com/tasks/102" }
+      ],
+      upcoming: [],
+      completed: [{ id: "t_103", name: "Q1 contract renewal countersigned", status: "Done",
+        notes: "Renewal closed 3/15. Next renewal Mar 2027.", updatedAt: "2026-03-15T16:00:00Z", url: "https://example.com/tasks/103" }]
+    },
+    links: [{ url: "https://example.com/portal/beacon-returns", notes: "Beacon returns portal (weekly)" }],
+    inboxMatrix: [
+      { threadUrl: "https://mail.example.com/thread/cap-raise", subject: "Raising TX cap to 300/day?", lastDate: "2026-06-01T05:48:00Z",
+        owner: "Maria", labels: ["00.received", "01.priority", "02.waiting/me"], summary: "Beacon asking for cap raise. Bullish on TX volume." }
     ],
-    inactive: [
-      { name: "Lou Rivers", role: "Former Director (left Dec 2025)", email: "lrivers@beaconsolar.example.com", phone: "" }
-    ]
-  },
-  tasks: {
-    blockers: [
-      { id: "t_101", name: "Approve TX cap raise to 300/day", status: "Waiting on us", notes: "Beacon asked 5/26. Tier 1 buyer; recommend approving today.", updatedAt: "2026-05-26T14:00:00Z", url: "https://example.com/tasks/101" }
+    reference: { "Return type": "Vendor portal (weekly)", "Payment terms": "Net-7", "Tier": "Top (5/5)", "Last invoice": "IWL-9802 paid in full" },
+    synthesis: "Beacon is the cleanest buyer on the desk: 12 straight weeks without a missed payment, returns done via portal on schedule, no Blockers. Today's cap-raise ask is a yes. The Q3 review ask from 5/24 has been sitting; bundle the two in one reply.",
+    openItems: [
+      { text: "TX cap raise approval (asked today, 6:08am)", waitingOn: "us",
+        sources: [{ label: "thread cap-raise", url: "https://mail.example.com/thread/cap-raise" }] },
+      { text: "Q3 quarterly review scheduling (asked 5/24)", waitingOn: "us",
+        sources: [{ label: "task 102", url: "https://example.com/tasks/102" }] }
     ],
-    ongoing: [
-      { id: "t_102", name: "Schedule Q3 quarterly review", status: "Waiting on us", notes: "Aim for second week of July.", updatedAt: "2026-05-20T09:00:00Z", url: "https://example.com/tasks/102" }
+    recommendedActions: [
+      { text: "Reply to Maria today: approve cap raise to 300 in TX starting Wed + propose 2 Q3 review slots in mid-July.", assignee: "me",
+        sources: [{ label: "thread cap-raise", url: "https://mail.example.com/thread/cap-raise" }, { label: "task 102", url: "https://example.com/tasks/102" }] }
     ],
-    upcoming: [],
-    completed: [
-      { id: "t_103", name: "Q1 contract renewal countersigned", status: "Done", notes: "Renewal closed 3/15.", updatedAt: "2026-03-15T16:00:00Z", url: "https://example.com/tasks/103" }
-    ]
-  },
-  links: [],
-  inboxMatrix: [],
-  reference: {},
-  synthesis: "Beacon has been clean for 12 weeks running. Current ask is capacity expansion in TX. Recommend approving the cap raise this week and scheduling a quarterly review.",
-  openItems: [],
-  recommendedActions: [],
-  headerMeta: { generatedAt: new Date().toISOString(), scope: "full" }
+    headerMeta: { generatedAt: "2026-06-01T06:10:00Z", scope: "full" }
+  }
 };
 
-SAMPLES.dormant = {
+SCENARIOS.dormant = {
+  trigger: {
+    when: 'Friday, 2:18pm',
+    what: 'Pat Adler at Northwind just resurfaced — first reply in 4 months. Asking if you\'re "still in business with them." You don\'t remember exactly how that paused relationship ended.'
+  },
+  threadsMeta: '23 threads in the zzzVendors/Northwind label — all 4+ months old',
+  threads: [
+    { from: 'Pat Adler (Northwind)', date: 'Today 2:11 PM', subject: 'Still doing business?', snippet: 'Hey Andy, been a minute. Saw you guys at the Solar Summit — are we still in business? I have some new TX volume looking for a home.' },
+    { from: 'Pat Adler (Northwind)', date: 'Jan 11 4:30 PM', subject: 'Re: Returns dispute Q4 — final', snippet: 'OK, agreed at 60%. Let\'s pause and revisit in a few months when things settle. No hard feelings.' },
+    { from: 'You', date: 'Jan 10 9:00 AM', subject: 'Re: Returns dispute Q4 — final', snippet: 'Final offer: 60% credit on the disputed batch. If that works, we both move on cleanly. If not, we should pause and revisit later.' },
+    { from: 'Pat Adler (Northwind)', date: 'Jan 8 1:45 PM', subject: 'Re: Returns dispute Q4', snippet: 'Looking at 75% credit. The bathroom batch was the issue, not the windows.' },
+    { from: 'You', date: 'Jan 6 11:20 AM', subject: 'Returns dispute Q4', snippet: 'Pat — reviewing your dispute on the Q4 returns. Numbers from our side attached. Let\'s align before this snowballs.' },
+  ],
+  callout: {
+    text: 'The Q4 returns dispute was <strong>resolved cleanly at 60% credit</strong>, MSA still active. The Tasks board has a <strong>deferred task: "Q2 2026 - probe re-engagement"</strong> with notes "wait for Pat\'s industry conference (mid-June)." Pat just gave you the opening on his own. <strong>Reactivate that task, don\'t spawn a parallel one.</strong>'
+  },
   vendor: {
-    id: "v_022", name: "Northwind Lead Group", side: "Buyer", status: "Paused", rating: 3,
-    url: "https://northwind.example.com", sourcing: "Cold outreach (Q3 2024)",
-    notes: "Paused after Q4 2025 returns dispute. Door is open; no work since Jan.",
-    verticals: { live: [], other: ["Bathroom", "Windows"] },
-    modalities: { live: [], other: ["Web Leads"] }
-  },
-  contacts: {
-    active: [
-      { name: "Pat Adler", role: "VP Acquisition", email: "pat@northwind.example.com", phone: "" }
+    vendor: { id: "v_022", name: "Northwind Lead Group", side: "Buyer", status: "Paused", rating: 3,
+      url: "https://northwind.example.com", sourcing: "Cold outreach (Q3 2024)",
+      notes: "Paused after Q4 2025 returns dispute. Door is open; no work since Jan. Pat is the relationship.",
+      verticals: { live: [], other: ["Bathroom", "Windows"] }, modalities: { live: [], other: ["Web Leads"] } },
+    contacts: {
+      active: [{ name: "Pat Adler", role: "VP Acquisition", email: "pat@northwind.example.com", phone: "" }],
+      inactive: [{ name: "Cara Mendes", role: "Former Ops Lead (left Q1 2026)", email: "cara@northwind.example.com", phone: "" }]
+    },
+    tasks: {
+      blockers: [],
+      ongoing: [],
+      upcoming: [{ id: "t_201", name: "Q2 2026 - probe re-engagement", status: "Deferred",
+        notes: "Wait for Pat's industry conference (mid-June). Don't churn the contact before then.",
+        updatedAt: "2026-04-01T10:00:00Z", url: "https://example.com/tasks/201" }],
+      completed: [{ id: "t_198", name: "Resolve Q4 2025 returns dispute", status: "Done",
+        notes: "Settled at 60% credit. Both sides agreed to pause cleanly. MSA stays active.",
+        updatedAt: "2026-01-12T15:00:00Z", url: "https://example.com/tasks/198" }]
+    },
+    links: [{ url: "https://example.com/contracts/northwind-msa.pdf", notes: "MSA (still active through 2026)" }],
+    inboxMatrix: [
+      { threadUrl: "https://mail.example.com/thread/resurface", subject: "Still doing business?",
+        lastDate: "2026-06-01T14:11:00Z", owner: "Pat", labels: ["00.received", "01.priority", "02.waiting/me"],
+        summary: "Pat resurfaced after 4 months. Has new TX volume." }
     ],
-    inactive: [
-      { name: "Cara Mendes", role: "Former Ops Lead", email: "cara@northwind.example.com", phone: "" }
-    ]
-  },
-  tasks: {
-    blockers: [],
-    ongoing: [],
-    upcoming: [
-      { id: "t_201", name: "Q2 2026 - probe re-engagement", status: "Deferred",
-        notes: "Wait for Pat's industry conference (mid-June) before reaching out.", updatedAt: "2026-04-01T10:00:00Z", url: "https://example.com/tasks/201" }
+    reference: { "Last invoice": "2025-12 (paid in full)", "Pause reason": "Returns dispute Q4 2025 (settled 60%)", "Re-engagement window": "Originally deferred until mid-June 2026" },
+    synthesis: "Northwind paused cleanly in January after the returns dispute resolved at 60% credit. The deferred re-engagement task was set for mid-June — Pat just gave you the opening himself, two weeks early. MSA is still active. Reactivate the existing deferred task (don't spawn a parallel one), and reply scheduling a call for next week.",
+    openItems: [
+      { text: "Pat asking re-engagement — opening came earlier than expected", waitingOn: "us",
+        sources: [{ label: "thread resurface", url: "https://mail.example.com/thread/resurface" }] }
     ],
-    completed: [
-      { id: "t_198", name: "Resolve Q4 2025 returns dispute", status: "Done",
-        notes: "Settled at 60% credit. Both sides agreed to pause.", updatedAt: "2026-01-12T15:00:00Z", url: "https://example.com/tasks/198" }
-    ]
-  },
-  links: [
-    { url: "https://example.com/contracts/northwind-msa.pdf", notes: "MSA (still active through 2026)" }
-  ],
-  inboxMatrix: [],
-  reference: {
-    "Last invoice": "2025-12 (paid in full)",
-    "Pause reason": "Returns dispute Q4 2025",
-    "Re-engagement window": "After June 2026 conference"
-  },
-  synthesis: "Northwind is intentionally Paused. Relationship is intact (MSA still active, returns dispute resolved cleanly). No action this month; revisit after Pat's June conference per the deferred task.",
-  openItems: [
-    { text: "Re-engagement probe deferred until mid-June 2026", waitingOn: "us",
-      sources: [{ label: "task 201", url: "https://example.com/tasks/201" }] }
-  ],
-  recommendedActions: [
-    { text: "No action. Hold until June. Don't churn the contact.", assignee: "me",
-      sources: [{ label: "task 201", url: "https://example.com/tasks/201" }] }
-  ],
-  headerMeta: { generatedAt: new Date().toISOString(), scope: "full" }
+    recommendedActions: [
+      { text: "Reactivate task 201 (Q2 re-engagement), prepend Pat's email as new context, then reply scheduling a 30-min intro call next week.", assignee: "me",
+        sources: [{ label: "task 201", url: "https://example.com/tasks/201" }, { label: "thread resurface", url: "https://mail.example.com/thread/resurface" }] }
+    ],
+    headerMeta: { generatedAt: "2026-06-01T14:18:00Z", scope: "full" }
+  }
 };
 
 // ---------- Renderer (ported from index.js) ----------
 
-function esc(s) {
-  if (s === null || s === undefined) return '';
-  return String(s).replace(/\|/g, '\\|');
-}
-function fmtDate(s) {
-  if (!s) return '';
-  const d = new Date(s);
-  if (isNaN(d.getTime())) return String(s);
-  return d.toISOString().slice(0, 10);
-}
-function link(text, url) {
-  if (!url) return text || '';
-  return `[${text || url}](${url})`;
-}
-function joinList(items) {
-  if (!items || !items.length) return '_none_';
-  return items.join(', ');
-}
+function esc(s) { if (s === null || s === undefined) return ''; return String(s).replace(/\|/g, '\\|'); }
+function fmtDate(s) { if (!s) return ''; const d = new Date(s); if (isNaN(d.getTime())) return String(s); return d.toISOString().slice(0,10); }
+function link(text, url) { if (!url) return text || ''; return `[${text||url}](${url})`; }
+function joinList(items) { if (!items || !items.length) return '_none_'; return items.join(', '); }
 
-function section1Header(v) {
-  const lines = [];
-  const name = v.vendor?.name || '_unnamed_';
-  lines.push(`# ${name}`);
-  const tags = [];
-  if (v.vendor?.side) tags.push(v.vendor.side);
-  if (v.vendor?.status) tags.push(v.vendor.status);
-  if (v.vendor?.rating) tags.push(`★ ${v.vendor.rating}`);
-  if (tags.length) lines.push(`**${tags.join(' · ')}**`);
-  if (v.vendor?.url) lines.push(`<${v.vendor.url}>`);
-  const meta = v.headerMeta || {};
-  const sub = [];
-  if (meta.generatedAt) sub.push(`generated: ${fmtDate(meta.generatedAt)}`);
-  if (meta.scope) sub.push(`scope: ${meta.scope}`);
-  if (meta.triggerThreadId) sub.push(`trigger: ${meta.triggerThreadId}`);
-  if (sub.length) lines.push(`<sub>${sub.join(' · ')}</sub>`);
-  return lines.join('\n\n');
-}
+function section1Header(v){const ls=[];const n=v.vendor?.name||'_unnamed_';ls.push(`# ${n}`);const t=[];if(v.vendor?.side)t.push(v.vendor.side);if(v.vendor?.status)t.push(v.vendor.status);if(v.vendor?.rating)t.push(`★ ${v.vendor.rating}`);if(t.length)ls.push(`**${t.join(' · ')}**`);if(v.vendor?.url)ls.push(`<${v.vendor.url}>`);const m=v.headerMeta||{};const s=[];if(m.generatedAt)s.push(`generated: ${fmtDate(m.generatedAt)}`);if(m.scope)s.push(`scope: ${m.scope}`);if(s.length)ls.push(`<sub>${s.join(' · ')}</sub>`);return ls.join('\n\n');}
+function section2Summary(v){const vd=v.vendor||{};const ls=['## 2. Summary',''];const rs=[['Side',vd.side],['Status',vd.status],['Rating',vd.rating?`★ ${vd.rating}`:null],['Verticals (live)',joinList(vd.verticals?.live)],['Verticals (other)',joinList(vd.verticals?.other)],['Modalities (live)',joinList(vd.modalities?.live)],['Modalities (other)',joinList(vd.modalities?.other)],['Sourcing',vd.sourcing],['Website',vd.url],['Notes',vd.notes]].filter(([,vv])=>vv!==null&&vv!==undefined&&vv!=='');if(!rs.length)return null;ls.push('| Field | Value |');ls.push('| --- | --- |');for(const[k,vv]of rs)ls.push(`| ${esc(k)} | ${esc(vv)} |`);return ls.join('\n');}
+function section3Contacts(v){const c=v.contacts||{};const a=c.active||[];const i=c.inactive||[];if(!a.length&&!i.length)return null;const ls=['## 3. Contacts',''];function rg(lbl,l){if(!l.length)return;ls.push(`**${lbl}**`);ls.push('');ls.push('| Name | Role | Email | Phone |');ls.push('| --- | --- | --- | --- |');for(const x of l)ls.push(`| ${esc(x.name)} | ${esc(x.role)} | ${esc(x.email)} | ${esc(x.phone)} |`);ls.push('');}rg('Active',a);rg('Inactive',i);return ls.join('\n').trim();}
+function section4Inbox(v){const t=v.inboxMatrix||[];if(!t.length)return null;const ls=['## 4. Inbox matrix',''];ls.push('| Subject | Last activity | Owner | Labels | Summary |');ls.push('| --- | --- | --- | --- | --- |');for(const x of t){const subj=link(x.subject||'(no subject)',x.threadUrl);ls.push(`| ${esc(subj)} | ${esc(fmtDate(x.lastDate))} | ${esc(x.owner||'—')} | ${esc((x.labels||[]).join(', '))} | ${esc(x.summary||'—')} |`);}return ls.join('\n');}
+function section5Links(v){const l=v.links||[];if(!l.length)return null;const ls=['## 5. Helpful Links',''];for(const x of l){const n=x.notes||x.url;ls.push(`- ${link(n,x.url)}`);}return ls.join('\n');}
+function section6Tasks(v){const t=v.tasks||{};const o=['blockers','ongoing','upcoming','completed'];const lb={blockers:'Blockers',ongoing:'Ongoing',upcoming:'Upcoming / Paused',completed:'Completed'};const a=o.some(g=>(t[g]||[]).length);if(!a)return null;const ls=['## 6. Tasks',''];for(const g of o){const lst=t[g]||[];if(!lst.length)continue;ls.push(`### ${lb[g]}`);ls.push('');for(const x of lst){const h=`- ${link(x.name,x.url)}`;const m=[];if(x.status)m.push(`status: ${x.status}`);if(x.updatedAt)m.push(`updated: ${fmtDate(x.updatedAt)}`);ls.push(m.length?`${h}  \n  _${m.join(' · ')}_`:h);if(x.notes)ls.push(`  > ${esc(x.notes).split('\n').join('\n  > ')}`);}ls.push('');}return ls.join('\n').trim();}
+function section7Ref(v){const r=v.reference||{};const es=Object.entries(r).filter(([,vv])=>vv!==null&&vv!==undefined&&vv!=='');if(!es.length)return null;const ls=['## 7. Reference',''];for(const[k,vv]of es)ls.push(`- **${esc(k)}**: ${esc(vv)}`);return ls.join('\n');}
+function section8Syn(v){const s=v.synthesis;if(!s)return null;return['## 8. Synthesis','',String(s).trim()].join('\n');}
+function srcLine(s){if(!s||!s.length)return '';const p=s.map(x=>typeof x==='string'?x:link(x.label||x.url,x.url));return `  \n  _Sources: ${p.join('; ')}_`;}
+function section9Open(v){const its=v.openItems||[];if(!its.length)return null;const ls=['## 9. Open Items',''];for(const it of its){let h=`- ${esc(it.text)}`;if(it.waitingOn)h+=` _(waiting on ${esc(it.waitingOn)})_`;ls.push(h+srcLine(it.sources));}return ls.join('\n');}
+function section10Rec(v){const its=v.recommendedActions||[];if(!its.length)return null;const ls=['## 10. Recommended Actions',''];its.forEach((it,i)=>{let h=`${i+1}. ${esc(it.text)}`;if(it.assignee)h+=` _[${esc(it.assignee)}]_`;ls.push(h+srcLine(it.sources));});return ls.join('\n');}
 
-function section2Summary(v) {
-  const vendor = v.vendor || {};
-  const lines = ['## 2. Summary', ''];
-  const rows = [
-    ['Side', vendor.side],
-    ['Status', vendor.status],
-    ['Rating', vendor.rating ? `★ ${vendor.rating}` : null],
-    ['Verticals (live)', joinList(vendor.verticals?.live)],
-    ['Verticals (other)', joinList(vendor.verticals?.other)],
-    ['Modalities (live)', joinList(vendor.modalities?.live)],
-    ['Modalities (other)', joinList(vendor.modalities?.other)],
-    ['Sourcing', vendor.sourcing],
-    ['Website', vendor.url],
-    ['Notes', vendor.notes],
-  ].filter(([, val]) => val !== null && val !== undefined && val !== '');
-  if (!rows.length) return null;
-  lines.push('| Field | Value |');
-  lines.push('| --- | --- |');
-  for (const [k, vv] of rows) lines.push(`| ${esc(k)} | ${esc(vv)} |`);
-  return lines.join('\n');
-}
+const SECTIONS = [section1Header, section2Summary, section3Contacts, section4Inbox, section5Links, section6Tasks, section7Ref, section8Syn, section9Open, section10Rec];
 
-function section3Contacts(v) {
-  const contacts = v.contacts || {};
-  const active = contacts.active || [];
-  const inactive = contacts.inactive || [];
-  if (!active.length && !inactive.length) return null;
-  const lines = ['## 3. Contacts', ''];
-  function renderGroup(label, list) {
-    if (!list.length) return;
-    lines.push(`**${label}**`);
-    lines.push('');
-    lines.push('| Name | Role | Email | Phone |');
-    lines.push('| --- | --- | --- | --- |');
-    for (const c of list) lines.push(`| ${esc(c.name)} | ${esc(c.role)} | ${esc(c.email)} | ${esc(c.phone)} |`);
-    lines.push('');
-  }
-  renderGroup('Active', active);
-  renderGroup('Inactive', inactive);
-  return lines.join('\n').trim();
-}
-
-function section4InboxMatrix(v) {
-  const threads = v.inboxMatrix || [];
-  if (!threads.length) return null;
-  const lines = ['## 4. Inbox matrix', ''];
-  lines.push('| Subject | Last activity | Owner | Labels | Summary |');
-  lines.push('| --- | --- | --- | --- | --- |');
-  for (const t of threads) {
-    const subj = link(t.subject || '(no subject)', t.threadUrl);
-    lines.push(`| ${esc(subj)} | ${esc(fmtDate(t.lastDate))} | ${esc(t.owner || '—')} | ${esc((t.labels || []).join(', '))} | ${esc(t.summary || '—')} |`);
-  }
-  return lines.join('\n');
-}
-
-function section5HelpfulLinks(v) {
-  const links = v.links || [];
-  if (!links.length) return null;
-  const lines = ['## 5. Helpful Links', ''];
-  for (const l of links) {
-    const name = l.notes || l.url;
-    lines.push(`- ${link(name, l.url)}${l.notes && l.url ? `  \n  ${esc(l.url)}` : ''}`);
-  }
-  return lines.join('\n');
-}
-
-function section6Tasks(v) {
-  const tasks = v.tasks || {};
-  const groupOrder = ['blockers', 'ongoing', 'upcoming', 'completed'];
-  const groupLabels = { blockers: 'Blockers', ongoing: 'Ongoing', upcoming: 'Upcoming / Paused', completed: 'Completed' };
-  const anyHasTasks = groupOrder.some(g => (tasks[g] || []).length);
-  if (!anyHasTasks) return null;
-  const lines = ['## 6. Tasks', ''];
-  for (const g of groupOrder) {
-    const list = tasks[g] || [];
-    if (!list.length) continue;
-    lines.push(`### ${groupLabels[g]}`);
-    lines.push('');
-    for (const t of list) {
-      const head = `- ${link(t.name, t.url)}`;
-      const meta = [];
-      if (t.status) meta.push(`status: ${t.status}`);
-      if (t.updatedAt) meta.push(`updated: ${fmtDate(t.updatedAt)}`);
-      lines.push(meta.length ? `${head}  \n  _${meta.join(' · ')}_` : head);
-      if (t.notes) lines.push(`  > ${esc(t.notes).split('\n').join('\n  > ')}`);
-    }
-    lines.push('');
-  }
-  return lines.join('\n').trim();
-}
-
-function section7Reference(v) {
-  const ref = v.reference || {};
-  const entries = Object.entries(ref).filter(([, val]) => val !== null && val !== undefined && val !== '');
-  if (!entries.length) return null;
-  const lines = ['## 7. Reference', ''];
-  for (const [k, val] of entries) lines.push(`- **${esc(k)}**: ${esc(val)}`);
-  return lines.join('\n');
-}
-
-function section8Synthesis(v) {
-  const s = v.synthesis;
-  if (!s) return null;
-  return ['## 8. Synthesis', '', String(s).trim()].join('\n');
-}
-
-function sourcesLine(sources) {
-  if (!sources || !sources.length) return '';
-  const parts = sources.map(s => typeof s === 'string' ? s : link(s.label || s.url, s.url));
-  return `  \n  _Sources: ${parts.join('; ')}_`;
-}
-
-function section9OpenItems(v) {
-  const items = v.openItems || [];
-  if (!items.length) return null;
-  const lines = ['## 9. Open Items', ''];
-  for (const it of items) {
-    let head = `- ${esc(it.text)}`;
-    if (it.waitingOn) head += ` _(waiting on ${esc(it.waitingOn)})_`;
-    lines.push(head + sourcesLine(it.sources));
-  }
-  return lines.join('\n');
-}
-
-function section10RecommendedActions(v) {
-  const items = v.recommendedActions || [];
-  if (!items.length) return null;
-  const lines = ['## 10. Recommended Actions', ''];
-  items.forEach((it, idx) => {
-    let head = `${idx + 1}. ${esc(it.text)}`;
-    if (it.assignee) head += ` _[${esc(it.assignee)}]_`;
-    lines.push(head + sourcesLine(it.sources));
-  });
-  return lines.join('\n');
-}
-
-const SECTIONS = [
-  section1Header, section2Summary, section3Contacts, section4InboxMatrix,
-  section5HelpfulLinks, section6Tasks, section7Reference,
-  section8Synthesis, section9OpenItems, section10RecommendedActions,
-];
-
-function render(vendor, opts = {}) {
+function render(vendor) {
   const out = [];
   for (const fn of SECTIONS) {
-    let rendered;
-    try { rendered = fn(vendor); }
-    catch (e) { rendered = `_(error rendering: ${e.message})_`; }
-    if (!rendered) {
-      if (opts.noEmpty) continue;
-      continue; // for the demo, drop empty sections by default for cleaner output
-    }
-    out.push(rendered);
+    let r;
+    try { r = fn(vendor); } catch (e) { r = `_(error: ${e.message})_`; }
+    if (r) out.push(r);
   }
   return out.join('\n\n') + '\n';
 }
 
-// ---------- UI wiring ----------
+// ---------- UI ----------
 
-const $input = document.getElementById('input');
-const $output = document.getElementById('output');
-const $err = document.getElementById('err');
-const $renderBtn = document.getElementById('render');
-const $samples = document.querySelectorAll('.samples button');
+function loadScenario(key) {
+  const s = SCENARIOS[key];
+  document.querySelectorAll('.scenario-bar button').forEach(b => b.classList.toggle('active', b.dataset.scenario === key));
 
-function loadSample(key) {
-  $input.value = JSON.stringify(SAMPLES[key], null, 2);
-  $samples.forEach(b => b.classList.toggle('active', b.dataset.sample === key));
-  doRender();
+  document.getElementById('scenario-trigger').innerHTML =
+    `<div class="when">${s.trigger.when}</div><div class="what">${s.trigger.what}</div>`;
+
+  document.getElementById('left-meta').textContent = s.threadsMeta;
+
+  const t = document.getElementById('threads');
+  t.innerHTML = '';
+  for (const th of s.threads) {
+    const div = document.createElement('div');
+    div.className = 'thread';
+    div.innerHTML = `<div class="thread-meta"><span class="from">${th.from}</span><span>·</span><span>${th.date}</span></div>
+      <div class="thread-subject">${th.subject}</div>
+      <div class="thread-snippet">${th.snippet}</div>`;
+    t.appendChild(div);
+  }
+  const tail = document.createElement('div');
+  tail.className = 'nothing-relevant';
+  tail.textContent = '... 14 older threads ...';
+  t.appendChild(tail);
+
+  document.getElementById('brief-callout').innerHTML = '<strong>What the brief catches:</strong> ' + s.callout.text;
+  document.getElementById('brief-output').innerHTML = marked.parse(render(s.vendor));
 }
 
-function doRender() {
-  $err.textContent = '';
-  let parsed;
-  try {
-    parsed = JSON.parse($input.value);
-  } catch (e) {
-    $err.textContent = 'Invalid JSON: ' + e.message;
-    return;
-  }
-  if (parsed === null || typeof parsed !== 'object' || Array.isArray(parsed)) {
-    $err.textContent = 'Input must be a JSON object.';
-    return;
-  }
-  try {
-    const md = render(parsed);
-    // marked.js renders the Markdown to HTML; we accept the literal <sub> + <https://...> tags too.
-    $output.innerHTML = marked.parse(md, { breaks: false });
-  } catch (e) {
-    $err.textContent = 'Render error: ' + e.message;
-  }
-}
+document.querySelectorAll('.scenario-bar button').forEach(b => b.addEventListener('click', () => loadScenario(b.dataset.scenario)));
+loadScenario('acme');
 
-$samples.forEach(b => b.addEventListener('click', () => loadSample(b.dataset.sample)));
-$renderBtn.addEventListener('click', doRender);
-
-// Load Acme on first paint
-loadSample('acme');
+// BYO section
+document.getElementById('byo-render').addEventListener('click', () => {
+  const err = document.getElementById('byo-err');
+  const out = document.getElementById('byo-output');
+  err.textContent = '';
+  let p;
+  try { p = JSON.parse(document.getElementById('byo-input').value); }
+  catch (e) { err.textContent = 'Invalid JSON: ' + e.message; return; }
+  if (!p || typeof p !== 'object' || Array.isArray(p)) { err.textContent = 'Input must be a JSON object.'; return; }
+  try { out.innerHTML = marked.parse(render(p)); }
+  catch (e) { err.textContent = 'Render error: ' + e.message; }
+});
 </script>
 </body>
 </html>
