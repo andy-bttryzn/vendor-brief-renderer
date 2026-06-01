@@ -1,6 +1,6 @@
 # vendor-brief-renderer
 
-![tests](https://github.com/USER/vendor-brief-renderer/actions/workflows/test.yml/badge.svg)
+![tests](https://github.com/andy-bttryzn/vendor-brief-renderer/actions/workflows/test.yml/badge.svg)
 
 Turn a structured `vendor.json` into a 10-section Markdown brief.
 
