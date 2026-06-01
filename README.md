@@ -115,7 +115,11 @@ See `examples/csv-adapter/` for an end-to-end pipeline showing how to turn data 
 
 ## Browser demo
 
-`demo/index.html` is a self-contained single-file demo: open it in any browser, pick a sample vendor (Live / Top-tier / Paused), see the brief render. Or paste your own `vendor.json` in the left panel. No build step, no hosting required.
+**Live: [andy-bttryzn.github.io/vendor-brief-renderer/demo](https://andy-bttryzn.github.io/vendor-brief-renderer/demo/)**
+
+Three operator scenarios (stalled cap raise / top-tier ask / dormant resurface), side-by-side: what scrolling shows you vs. what the brief surfaces. Paste your own `vendor.json` below to render it client-side.
+
+`demo/index.html` is a self-contained single-file build: open it locally, no build step, no hosting required.
 
 ## Tests
 
